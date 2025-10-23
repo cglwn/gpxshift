@@ -1,2 +1,3 @@
-`gpxshift` lets you shift the timestamps in a GPX through a the command-line.
+`gpxshift` lets you shift time in a GPX file in the command line.
 
+![](img/gpxshift.png)
