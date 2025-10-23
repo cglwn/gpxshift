@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="gpxshift tests" xmlns="http://www.topografix.com/GPX/1/1">
+  <metadata>
+    <name>CN Tower Sample Ride</name>
+    <time>2025-07-01T08:00:00Z</time>
+  </metadata>
+  <trk>
+    <name>CN Tower Morning Loop</name>
+    <trkseg>
+      <trkpt lat="43.642563" lon="-79.387139">
+        <ele>76.0</ele>
+        <time>2025-07-01T08:00:00Z</time>
+      </trkpt>
+      <trkpt lat="43.642750" lon="-79.386990">
+        <ele>76.4</ele>
+        <time>2025-07-01T08:05:00Z</time>
+      </trkpt>
+      <trkpt lat="43.642150" lon="-79.387500">
+        <ele>75.8</ele>
+        <time>2025-07-01T08:10:00Z</time>
+      </trkpt>
+    </trkseg>
+  </trk>
+</gpx>
