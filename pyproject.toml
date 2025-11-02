@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=72", "setuptools_scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gpxshift"
+requires-python = ">=3.8"
+dynamic = ["version"]
+readme = "README.md"
+description = "A tool for shifting timestamps in GPX files"
+authors = [
+    {name = "cglwn"},
+]
+
+dependencies = [
+    "gpxpy>=1.6.0",
+    "rich>=13.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+]
+
+[project.scripts]
+gpxshift = "gpxshift:main"
+
+[project.urls]
+Repository = "https://github.com/cglwn/gpxshift"
+Issues = "https://github.com/cglwn/gpxshift/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["gpxshift"]
+namespaces = false
+
+[tool.setuptools]
+py-modules = ["gpxshift"]
+
+[tool.setuptools_scm]
+local_scheme = "no-local-version"
