@@ -27,7 +27,7 @@ def utc_to_local(utc_dt):
 
 
 GPX_TIME_PATTERN = re.compile(
-    r"(<time>)(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z)(</time>)"
+    r"(<time>)(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z)(</time>)"
 )
 
 
@@ -37,9 +37,22 @@ def shift_gpx_times(gpx_text, shift_delta):
 
     def _replace(match):
         timestamp_str = match.group(2)
-        timestamp = datetime.datetime.strptime(timestamp_str, "%Y-%m-%dT%H:%M:%SZ")
+        # Handle both formats: with and without milliseconds
+        if "." in timestamp_str:
+            timestamp = datetime.datetime.strptime(timestamp_str, "%Y-%m-%dT%H:%M:%S.%fZ")
+            output_format = "%Y-%m-%dT%H:%M:%S.%fZ"
+        else:
+            timestamp = datetime.datetime.strptime(timestamp_str, "%Y-%m-%dT%H:%M:%SZ")
+            output_format = "%Y-%m-%dT%H:%M:%SZ"
+        
         timestamp = timestamp.replace(tzinfo=datetime.timezone.utc) + shift_delta
-        return f"{match.group(1)}{timestamp.strftime('%Y-%m-%dT%H:%M:%SZ')}{match.group(3)}"
+        shifted_str = timestamp.strftime(output_format)
+        
+        # Ensure milliseconds are exactly 3 digits if present
+        if "." in output_format:
+            shifted_str = re.sub(r'\.(\d{3})\d*Z', r'.\1Z', shifted_str)
+        
+        return f"{match.group(1)}{shifted_str}{match.group(3)}"
 
     return GPX_TIME_PATTERN.sub(_replace, gpx_text)
 
@@ -50,9 +63,7 @@ class GPXShiftApp:
         self.original_gpx_path = Path(self.gpx_file_path)
         self.original_gpx_text = self.original_gpx_path.read_text()
         self.original_gpx = self._parse_gpx_text(self.original_gpx_text)
-        self.current_gpx = self._parse_gpx_text(
-            self.original_gpx_text
-        ) 
+        self.current_gpx = self._parse_gpx_text(self.original_gpx_text)
         self.time_shift = datetime.timedelta(hours=0)
         self.display_utc = False
 
@@ -252,7 +263,20 @@ def main():
         )
         sys.exit(1)
 
-    app = GPXShiftApp(args.gpx_file)
+    try:
+        app = GPXShiftApp(args.gpx_file)
+    except gpxpy.gpx.GPXXMLSyntaxException as e:
+        console.print(
+            f"[bold red]Error:[/bold red] The file '{args.gpx_file}' is not a valid GPX file."
+        )
+        console.print(f"[yellow]Details:[/yellow] {str(e)}")
+        sys.exit(1)
+    except Exception as e:
+        console.print(
+            f"[bold red]Error:[/bold red] Failed to load GPX file '{args.gpx_file}'"
+        )
+        console.print(f"[yellow]Details:[/yellow] {str(e)}")
+        sys.exit(1)
 
     with Live(
         make_layout(app), console=console, screen=True, auto_refresh=False

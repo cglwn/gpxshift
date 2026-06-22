@@ -1,5 +1,8 @@
 from pathlib import Path
 
+import pytest
+import gpxpy.gpx
+
 from gpxshift import GPXShiftApp
 
 
@@ -62,3 +65,21 @@ def test_default_output_filename_negative_shift(tmp_path):
     assert saved_path == default_path
     assert saved_path.exists()
     assert "<time>2025-01-01T10:00:00Z</time>" in saved_path.read_text()
+
+
+def test_garmin_connect_format_with_milliseconds(tmp_path):
+    """Test that Garmin Connect GPX files with millisecond timestamps are handled correctly."""
+    input_path = tmp_path / "garmin_run.gpx"
+    # Garmin Connect format includes milliseconds (.000)
+    input_path.write_text(_make_sample_gpx("2026-06-22T13:36:49.000Z"))
+
+    app = GPXShiftApp(str(input_path))
+    app.shift_time(-13)
+
+    saved_path = app.save_gpx()
+    output_text = saved_path.read_text()
+    
+    # Verify the timestamp was shifted correctly and milliseconds are preserved
+    assert "<time>2026-06-22T00:36:49.000Z</time>" in output_text
+    # Verify milliseconds are preserved
+    assert ".000Z" in output_text
